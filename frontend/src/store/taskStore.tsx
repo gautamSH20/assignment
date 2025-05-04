@@ -9,7 +9,6 @@ interface Recurrence {
 }
 
 interface Task {
-  id: number;
   title: string;
   description: string;
   status: string;
@@ -25,15 +24,20 @@ interface TaskState {
   deleteTask: (id: number) => Promise<void>;
 }
 
+const BACKEND_URL = "http://localhost:3000";
+
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
 
   fetchTasks: async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get<{ tasks: Task[] }>("/task/v1/getAll", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get<{ tasks: Task[] }>(
+        `${BACKEND_URL}/task/v1/getAll`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       set({ tasks: response.data.tasks });
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
@@ -44,7 +48,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   createTask: async (task) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/task/v1/create", task, {
+      await axios.post(`${BACKEND_URL}/task/v1/create`, task, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await get().fetchTasks(); // Refresh tasks after creation
@@ -57,7 +61,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   updateTask: async (id, task) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`/task/v1/update/${id}`, task, {
+      await axios.put(`${BACKEND_URL}/task/v1/update/${id}`, task, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await get().fetchTasks(); // Refresh tasks after update
@@ -70,7 +74,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   deleteTask: async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`/task/v1/delete/${id}`, {
+      await axios.delete(`${BACKEND_URL}/task/v1/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await get().fetchTasks(); // Refresh tasks after deletion
