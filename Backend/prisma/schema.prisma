@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  username  String @unique
+  password  String
+  email     String @unique
+  tasks     Task[]
+}
+model Task {
+ id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  status      String
+  recurrence  Recurrence[]  // Corrected the name and made it plural
+  tags        String        // Changed to lowercase for consistency
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  createdAt   DateTime      @default(now())  // Added timestamp
+  updatedAt   DateTime      @updatedAt       // Added timestamp
+}
+
+model Recurrence{
+  id         Int        @id @default(autoincrement())
+  taskId     Int
+  frequency  String     // Changed to String to store recurrence type
+  interval   Int        // Added interval (every X days/weeks/etc)
+  startDate  DateTime   // Added start date
+  endDate    DateTime?  // Optional end date
+  task       Task       @relation(fields: [taskId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+}
